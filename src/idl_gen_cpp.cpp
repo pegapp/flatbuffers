@@ -301,6 +301,7 @@ static void GenTable(const Parser &parser, StructDef &struct_def,
     if (!field.deprecated) {  // Deprecated fields won't be accessible.
       auto is_scalar = IsScalar(field.value.type.base_type);
       GenComment(field.doc_comment, code_ptr, nullptr, "  ");
+
       code += "  " + GenTypeGet(parser, field.value.type, " ", "const ", " *",
                                 true);
       code += field.name + "() const { return ";
@@ -319,6 +320,11 @@ static void GenTable(const Parser &parser, StructDef &struct_def,
       call += ")";
       code += GenUnderlyingCast(parser, field, true, call);
       code += "; }\n";
+
+      // DWH
+      code += "  bool has_" + field.name + "() const ";
+      code += " { return CheckField(" + offsetstr + "); }\n";
+ 
       if (parser.opts.mutable_buffer) {
         if (is_scalar) {
           code += "  bool mutate_" + field.name + "(";
